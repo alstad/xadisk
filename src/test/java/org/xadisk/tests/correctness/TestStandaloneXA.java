@@ -6,18 +6,23 @@
  */
 package org.xadisk.tests.correctness;
 
-import java.io.File;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
+import com.atomikos.icatch.jta.UserTransactionManager;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.xadisk.bridge.proxies.interfaces.XAFileSystem;
 import org.xadisk.bridge.proxies.interfaces.XAFileSystemProxy;
 import org.xadisk.bridge.proxies.interfaces.XASession;
-import org.xadisk.filesystem.NativeSession;
 import org.xadisk.filesystem.NativeXASession;
 import org.xadisk.filesystem.SessionCommonness;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
+import org.xadisk.filesystem.utilities.FileIOUtility;
+
+import javax.transaction.Transaction;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.io.File;
+import java.io.IOException;
 
 /*For testing, we used Atomikos (open source version) as a JTA implementation. One can get it from
  http://www.atomikos.com/Main/TransactionsEssentials .
@@ -28,7 +33,29 @@ public class TestStandaloneXA {
     private static final String TMP_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "tmp" + SEPARATOR;
     private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "xa";
 
-    public static void main(String args[]) {
+    @Before
+    public void setupTest() {
+        new File(TMP_DIRECTORY).mkdirs();
+    }
+
+    @After
+    public void shutdownXaDisk() throws IOException {
+        final XAFileSystem localXaFileSystem = XAFileSystemProxy.getNativeXAFileSystemReference("local");
+        if (localXaFileSystem != null) {
+            try {
+                localXaFileSystem.shutdown();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // Delete test files/directories
+        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(new File(System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "atomikos"));
+    }
+
+    @Test
+    public void testStandaloneXA() {
+        UserTransactionManager tm = null;
         try {
             boolean testRemote = false;
             int remotePort = 4678;
@@ -46,7 +73,7 @@ public class TestStandaloneXA {
             }
             XASession xaSession = xafs.createSessionForXATransaction();
             XAResource xar = xaSession.getXAResource();
-            TransactionManager tm = new com.atomikos.icatch.jta.UserTransactionManager();
+            tm = new UserTransactionManager();
             //UNCOMMENT ABOVE ONCE YOU BRING ATOMIKOS INTO THE CLASSPATH.
             //TransactionManager tm = null;
             tm.setTransactionTimeout(60);
@@ -95,6 +122,10 @@ public class TestStandaloneXA {
             nativeXAFS.shutdown();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (tm != null) {
+                tm.close();
+            }
         }
     }
 }

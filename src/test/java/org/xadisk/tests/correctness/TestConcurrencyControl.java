@@ -6,20 +6,45 @@
  */
 package org.xadisk.tests.correctness;
 
-import java.io.File;
-
+import org.junit.After;
 import org.junit.Test;
-import org.xadisk.filesystem.ConcurrencyControl;
 import org.xadisk.bridge.proxies.interfaces.Session;
 import org.xadisk.bridge.proxies.interfaces.XAFileSystem;
 import org.xadisk.bridge.proxies.interfaces.XAFileSystemProxy;
+import org.xadisk.filesystem.ConcurrencyControl;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
+import org.xadisk.filesystem.utilities.FileIOUtility;
+
+import java.io.File;
+import java.io.IOException;
 
 public class TestConcurrencyControl {
     private static final String SEPARATOR = File.separator;
     private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
     private static final String TMP_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "tmp" + SEPARATOR;
-    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + "XADiskSystem"  + SEPARATOR;
+    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystem"  + SEPARATOR;
+
+    @After
+    public void shutdownXaDisk() throws IOException {
+        final XAFileSystem masterXaFileSystem = XAFileSystemProxy.getNativeXAFileSystemReference("master");
+        final XAFileSystem slaveXaFileSystem = XAFileSystemProxy.getNativeXAFileSystemReference("slave");
+        if (masterXaFileSystem != null) {
+            try {
+                masterXaFileSystem.shutdown();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (slaveXaFileSystem != null) {
+            try {
+                slaveXaFileSystem.shutdown();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // Delete test files/directories
+        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+    }
 
     @Test
     public void testConcurrencyControl() {

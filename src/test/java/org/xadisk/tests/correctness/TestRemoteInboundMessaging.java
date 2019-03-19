@@ -6,20 +6,23 @@
  */
 package org.xadisk.tests.correctness;
 
-import java.io.File;
-import java.io.IOException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-
+import org.junit.After;
 import org.junit.Test;
 import org.xadisk.bridge.proxies.impl.RemoteXAFileSystem;
 import org.xadisk.bridge.proxies.interfaces.Session;
+import org.xadisk.bridge.proxies.interfaces.XAFileSystem;
 import org.xadisk.bridge.proxies.interfaces.XAFileSystemProxy;
 import org.xadisk.connector.inbound.EndPointActivation;
 import org.xadisk.connector.inbound.XADiskActivationSpecImpl;
 import org.xadisk.filesystem.NativeXAFileSystem;
 import org.xadisk.filesystem.SessionCommonness;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
+import org.xadisk.filesystem.utilities.FileIOUtility;
+
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.fail;
 
@@ -28,11 +31,24 @@ public class TestRemoteInboundMessaging {
     private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
     private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystemLocal";
 
+    @After
+    public void shutdownXaDisk() throws IOException {
+        final XAFileSystem localXaFileSystem = XAFileSystemProxy.getNativeXAFileSystemReference("local");
+        if (localXaFileSystem != null) {
+            try {
+                localXaFileSystem.shutdown();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // Delete test files/directories
+        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+    }
+
     @Test
     public void main() {
         try {
-            TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
-            TestUtility.cleanupDirectory(new File(CURRENT_WORKING_DIRECTORY));
+            FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
             TestUtility.cleanupDirectory(new File(RemoteXADiskBootup.XA_DISK_SYSTEM_DIRECTORY));
 
             File f = new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + "a.txt");

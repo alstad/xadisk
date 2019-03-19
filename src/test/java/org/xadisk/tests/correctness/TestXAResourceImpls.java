@@ -6,25 +6,43 @@
  */
 package org.xadisk.tests.correctness;
 
-import java.io.File;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-
+import org.junit.After;
 import org.junit.Test;
+import org.xadisk.bridge.proxies.interfaces.XAFileSystem;
+import org.xadisk.bridge.proxies.interfaces.XAFileSystemProxy;
 import org.xadisk.bridge.proxies.interfaces.XASession;
 import org.xadisk.connector.inbound.EndPointActivation;
 import org.xadisk.connector.inbound.XADiskActivationSpecImpl;
 import org.xadisk.filesystem.NativeXAFileSystem;
-import org.xadisk.filesystem.XAFileSystemCommonness;
 import org.xadisk.filesystem.TransactionInformation;
+import org.xadisk.filesystem.XAFileSystemCommonness;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
 import org.xadisk.filesystem.utilities.FileIOUtility;
+
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.io.File;
+import java.io.IOException;
 
 public class TestXAResourceImpls {
     private static final String SEPARATOR = File.separator;
     private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
     private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystem";
     private static long txnId = System.currentTimeMillis();
+
+    @After
+    public void shutdownXaDisk() throws IOException {
+        final XAFileSystem localXaFileSystem = XAFileSystemProxy.getNativeXAFileSystemReference("local");
+        if (localXaFileSystem != null) {
+            try {
+                localXaFileSystem.shutdown();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // Delete test files/directories
+        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+    }
 
     @Test
     public void testXaResourceImpls() {
@@ -34,7 +52,7 @@ public class TestXAResourceImpls {
     public static void main() {
         XAFileSystemCommonness xafs = null;
         try {
-            TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
+            TestUtility.cleanupDirectory(new File(CURRENT_WORKING_DIRECTORY));
             boolean commitDuringRecovery = true;
             File f[] = new File[3];
             for (int i = 0; i < 3; i++) {

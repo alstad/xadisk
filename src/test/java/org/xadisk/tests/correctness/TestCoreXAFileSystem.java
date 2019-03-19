@@ -11,26 +11,45 @@ import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.connect.Connector.Argument;
 import com.sun.jdi.connect.Connector.StringArgument;
 import com.sun.jdi.connect.LaunchingConnector;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Map;
-
+import org.junit.After;
 import org.junit.Test;
+import org.xadisk.bridge.proxies.interfaces.XAFileSystem;
 import org.xadisk.bridge.proxies.interfaces.XAFileSystemProxy;
 import org.xadisk.filesystem.NativeXAFileSystem;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
+import org.xadisk.filesystem.utilities.FileIOUtility;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class TestCoreXAFileSystem {
 
-    private static final String SEPERATOR = File.separator;
-    private static final String topLevelTestDirectory = Configuration.getTestRootDirectory();
-    private static final String XADiskSystemDirectory = Configuration.getXADiskSystemDirectory();
-    private static final String forRunningTests = "forRunningTests";
-    private static final String transactionDemarcatingThread = "TestThreadObservedByJDI";
-    static boolean testCrashRecovery = true;
-    static int concurrencyLevel = 4;
-    static int numberOfCrashes = 10;
-    static int maxConcurrentDeliveries = 1;
+    private static final String SEPARATOR = File.separator;
+    private static final String TOP_LEVEL_TEST_DIRECTORY = Configuration.getTestRootDirectory();
+    private static final String XA_DISK_SYSTEM_DIRECTORY = Configuration.getXADiskSystemDirectory();
+    private static final String FOR_RUNNING_TESTS = "forRunningTests";
+    private static final String TRANSACTION_DEMARCATING_THREAD = "TestThreadObservedByJDI";
+    private static boolean testCrashRecovery = true;
+    private static int concurrencyLevel = 4;
+    private static int numberOfCrashes = 10;
+    private static int maxConcurrentDeliveries = 1;
+
+    @After
+    public void shutdownXaDisk() throws IOException {
+        final XAFileSystem localXaFileSystem = XAFileSystemProxy.getNativeXAFileSystemReference("local");
+        if (localXaFileSystem != null) {
+            try {
+                localXaFileSystem.shutdown();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // Delete test files/directories
+        FileIOUtility.deleteDirectoryRecursively(new File(TOP_LEVEL_TEST_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(new File(XA_DISK_SYSTEM_DIRECTORY));
+    }
 
     @Test
     public void performXaFileSystemTests() {
@@ -39,18 +58,18 @@ public class TestCoreXAFileSystem {
 
     public static void main(String args[]) {
         try {
-            if (args.length > 0 && args[0].equals(forRunningTests)) {
-                System.out.println("Entered into the main of childJVM " + forRunningTests);
+            if (args.length > 0 && args[0].equals(FOR_RUNNING_TESTS)) {
+                System.out.println("Entered into the main of childJVM " + FOR_RUNNING_TESTS);
                 test(false);
                 System.out.println("Exit...");
             } else {
                 if (testCrashRecovery) {
                     System.out.println("_____________Start-CrashRecoveryTests______________");
                     for (int i = 1; i <= numberOfCrashes; i++) {
-                        TestUtility.cleanupDirectory(new File(XADiskSystemDirectory));
-                        TestUtility.cleanupDirectory(new File(topLevelTestDirectory));
+                        TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
+                        TestUtility.cleanupDirectory(new File(TOP_LEVEL_TEST_DIRECTORY));
                         System.out.println("Raising child JVM for controlled crash...");
-                        Process controlledJVM = powerOnJVMAsDebugeeForCrashes(forRunningTests, i);
+                        Process controlledJVM = powerOnJVMAsDebugeeForCrashes(FOR_RUNNING_TESTS, i);
                         int status = controlledJVM.waitFor();
                         if (status == 0) {
                             break;
@@ -60,8 +79,8 @@ public class TestCoreXAFileSystem {
                         System.out.println("_______________Recovered Successfully______________");
                     }
                 } else {
-                    TestUtility.cleanupDirectory(new File(XADiskSystemDirectory));
-                    TestUtility.cleanupDirectory(new File(topLevelTestDirectory));
+                    TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
+                    TestUtility.cleanupDirectory(new File(TOP_LEVEL_TEST_DIRECTORY));
                     test(false);
                 }
             }
@@ -77,8 +96,7 @@ public class TestCoreXAFileSystem {
         StringArgument mainArgument = (StringArgument) connectorArguments.get("main");
         mainArgument.setValue(org.xadisk.tests.correctness.TestCoreXAFileSystem.class.getName() + " " + purpose);
         StringArgument optionsArgument = (StringArgument) connectorArguments.get("options");
-        optionsArgument.setValue("-classpath build" + SEPERATOR + "classes;"
-                + "connector-api-1.5.jar;javaee-api-5.jar");
+        optionsArgument.setValue("-classpath build" + SEPARATOR + "classes;javaee-api-8.0.jar");
         return connector.launch(connectorArguments);
     }
 
@@ -92,7 +110,7 @@ public class TestCoreXAFileSystem {
     private static Process powerOnJVMAsDebugeeForCrashes(String purpose, int crashAfterBreakpoint)
             throws Exception {
         VirtualMachine vm = powerOnJVMAsDebugee(purpose);
-        new Thread(new JVMCrashTrigger(vm, transactionDemarcatingThread, crashAfterBreakpoint)).start();
+        new Thread(new JVMCrashTrigger(vm, TRANSACTION_DEMARCATING_THREAD, crashAfterBreakpoint)).start();
         Process jvmProcess = vm.process();
         initiateOutputProcessing(jvmProcess);
         return jvmProcess;
@@ -100,7 +118,7 @@ public class TestCoreXAFileSystem {
 
     private static void test(boolean postCrash) {
         try {
-            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XADiskSystemDirectory, "local");
+            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
             configuration.setWorkManagerCorePoolSize(10);
             configuration.setWorkManagerMaxPoolSize(10000);
             configuration.setMaximumConcurrentEventDeliveries(maxConcurrentDeliveries);
@@ -133,14 +151,14 @@ public class TestCoreXAFileSystem {
                             testDirectory = testDirectory.substring(0, testDirectory.length() - 9);
                         }
                         tests[threadIndex++] = new Thread(new RunnableTest(testName,
-                                topLevelTestDirectory + SEPERATOR + testDirectory + testReplica));
+                                TOP_LEVEL_TEST_DIRECTORY + SEPARATOR + testDirectory + testReplica));
                     }
                 }
                 for (int i = 0; i < 4; i++) {
                     if (i != 0) {
                         continue;
                     }
-                    tests[i].setName(transactionDemarcatingThread);
+                    tests[i].setName(TRANSACTION_DEMARCATING_THREAD);
                     tests[i].start();
                     allThreads.add(tests[i]);
                 }

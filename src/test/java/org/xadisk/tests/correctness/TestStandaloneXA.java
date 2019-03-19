@@ -23,12 +23,16 @@ import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
  http://www.atomikos.com/Main/TransactionsEssentials .
  */
 public class TestStandaloneXA {
+    private static final String SEPARATOR = File.separator;
+    private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
+    private static final String TMP_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "tmp" + SEPARATOR;
+    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "xa";
 
     public static void main(String args[]) {
         try {
             boolean testRemote = false;
             int remotePort = 4678;
-            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration("C:\\xa", "local");
+            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
             configuration.setEnableRemoteInvocations(Boolean.TRUE);
             configuration.setServerAddress("localhost");
             configuration.setServerPort(remotePort);
@@ -47,9 +51,9 @@ public class TestStandaloneXA {
             //TransactionManager tm = null;
             tm.setTransactionTimeout(60);
 
-            File f1 = new File("C:\\1.txt");
-            File f2 = new File("C:\\2.txt");
-            File f3 = new File("C:\\3.txt");
+            File f1 = new File(TMP_DIRECTORY + "1.txt");
+            File f2 = new File(TMP_DIRECTORY + "2.txt");
+            File f3 = new File(TMP_DIRECTORY + "3.txt");
             f1.delete();
             f2.delete();
             f3.delete();

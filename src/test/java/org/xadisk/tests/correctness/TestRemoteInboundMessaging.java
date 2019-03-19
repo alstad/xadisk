@@ -24,19 +24,18 @@ import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
 import static org.junit.Assert.fail;
 
 public class TestRemoteInboundMessaging {
-
-    private static final String SEPERATOR = File.separator;
-    private static final String currentWorkingDirectory = "./test";
-    private static final String XADiskSystemDirectory = currentWorkingDirectory + SEPERATOR + "XADiskSystemLocal";
+    private static final String SEPARATOR = File.separator;
+    private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
+    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystemLocal";
 
     @Test
     public void main() {
         try {
-            TestUtility.cleanupDirectory(new File(XADiskSystemDirectory));
-            TestUtility.cleanupDirectory(new File(currentWorkingDirectory));
-            TestUtility.cleanupDirectory(new File(RemoteXADiskBootup.XADiskSystemDirectory));
+            TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
+            TestUtility.cleanupDirectory(new File(CURRENT_WORKING_DIRECTORY));
+            TestUtility.cleanupDirectory(new File(RemoteXADiskBootup.XA_DISK_SYSTEM_DIRECTORY));
 
-            File f = new File(currentWorkingDirectory + "\\a.txt");
+            File f = new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + "a.txt");
 
             System.out.println("Remember to set the cleanupSystemDir flag in RemoteXADiskBootup class to false");
             NativeXAFileSystem nativeXAFS = bootLocalXADisk();
@@ -47,7 +46,7 @@ public class TestRemoteInboundMessaging {
             as.setAreFilesRemote("true");
             as.setRemoteServerAddress("localhost");
             as.setRemoteServerPort(RemoteXADiskBootup.DEFAULT_PORT + "");
-            as.setFileNamesAndEventInterests(currentWorkingDirectory + "\\::111");
+            as.setFileNamesAndEventInterests(CURRENT_WORKING_DIRECTORY + "\\::111");
             EndPointActivation activation = new EndPointActivation(mef, as);
 
             bootRemoteXADisk();
@@ -118,7 +117,7 @@ public class TestRemoteInboundMessaging {
     }
 
     private static NativeXAFileSystem bootLocalXADisk() throws InterruptedException {
-        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XADiskSystemDirectory, "local");
+        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
         configuration.setWorkManagerCorePoolSize(100);
         configuration.setWorkManagerMaxPoolSize(100);
         configuration.setServerPort(2345);

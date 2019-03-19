@@ -18,15 +18,15 @@ import org.xadisk.filesystem.NativeXAFileSystem;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
 
 public class TestWrapperStreams {
-
-    private static final String SEPERATOR = File.separator;
-    private static final String currentWorkingDirectory = System.getProperty("user.dir");
-    private static final String XADiskSystemDirectory = currentWorkingDirectory + SEPERATOR + "XADiskSystem";
+    private static final String SEPARATOR = File.separator;
+    private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
+    private static final String TMP_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "tmp" + SEPARATOR;
+    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystem";
 
     @Test
     public void wrapperStreams() {
         try {
-            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XADiskSystemDirectory, "local");
+            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
             configuration.setWorkManagerCorePoolSize(100);
             configuration.setWorkManagerMaxPoolSize(100);
             configuration.setServerPort(9998);
@@ -35,7 +35,7 @@ public class TestWrapperStreams {
             xaFileSystem.waitForBootup(-1L);
 
             Session session = xaFileSystem.createSessionForLocalTransaction();
-            InputStream is = new XAFileInputStreamWrapper(session.createXAFileInputStream(new File("C:\\a.txt"), false));
+            InputStream is = new XAFileInputStreamWrapper(session.createXAFileInputStream(new File(TMP_DIRECTORY +"a.txt"), false));
             is.mark(100);
             System.out.println((char) is.read());
             System.out.println((char) is.read());
@@ -44,7 +44,7 @@ public class TestWrapperStreams {
             System.out.println((char) is.read());
             is.close();
 
-            OutputStream os = new XAFileOutputStreamWrapper(session.createXAFileOutputStream(new File("C:\\b.txt"), false));
+            OutputStream os = new XAFileOutputStreamWrapper(session.createXAFileOutputStream(new File(TMP_DIRECTORY +"b.txt"), false));
             os.write('a');
             os.write('b');
             os.close();

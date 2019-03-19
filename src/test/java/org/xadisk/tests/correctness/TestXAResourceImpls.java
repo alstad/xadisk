@@ -21,10 +21,9 @@ import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
 import org.xadisk.filesystem.utilities.FileIOUtility;
 
 public class TestXAResourceImpls {
-
-    private static final String SEPERATOR = File.separator;
-    private static final String currentWorkingDirectory = "C:\\test";
-    private static final String XADiskSystemDirectory = "C:\\XADiskSystem";
+    private static final String SEPARATOR = File.separator;
+    private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
+    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystem";
     private static long txnId = System.currentTimeMillis();
 
     @Test
@@ -35,11 +34,11 @@ public class TestXAResourceImpls {
     public static void main() {
         XAFileSystemCommonness xafs = null;
         try {
-            TestUtility.cleanupDirectory(new File(XADiskSystemDirectory));
+            TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
             boolean commitDuringRecovery = true;
             File f[] = new File[3];
             for (int i = 0; i < 3; i++) {
-                File dir = new File(currentWorkingDirectory + SEPERATOR + i);
+                File dir = new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + i);
                 FileIOUtility.deleteDirectoryRecursively(dir);
                 FileIOUtility.createDirectoriesIfRequired(dir);
                 f[i] = new File(dir, "a.txt");
@@ -110,7 +109,7 @@ public class TestXAResourceImpls {
             smef.goTill = SimulatedMessageEndpointFactory.GoTill.consume;
             XADiskActivationSpecImpl as = new XADiskActivationSpecImpl();
             as.setAreFilesRemote("false");
-            as.setFileNamesAndEventInterests(new File(currentWorkingDirectory + SEPERATOR + 0).getAbsolutePath()
+            as.setFileNamesAndEventInterests(new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + 0).getAbsolutePath()
                     + "::111");
             xafs.registerEndPointActivation(new EndPointActivation(smef, as));
 
@@ -118,7 +117,7 @@ public class TestXAResourceImpls {
             smef.goTill = SimulatedMessageEndpointFactory.GoTill.prepare;
             as = new XADiskActivationSpecImpl();
             as.setAreFilesRemote("false");
-            as.setFileNamesAndEventInterests(new File(currentWorkingDirectory + SEPERATOR + 1).getAbsolutePath()
+            as.setFileNamesAndEventInterests(new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + 1).getAbsolutePath()
                     + "::111");
             xafs.registerEndPointActivation(new EndPointActivation(smef, as));
 
@@ -126,7 +125,7 @@ public class TestXAResourceImpls {
             smef.goTill = SimulatedMessageEndpointFactory.GoTill.commit;
             as = new XADiskActivationSpecImpl();
             as.setAreFilesRemote("false");
-            as.setFileNamesAndEventInterests(new File(currentWorkingDirectory + SEPERATOR + 2).getAbsolutePath()
+            as.setFileNamesAndEventInterests(new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + 2).getAbsolutePath()
                     + "::111");
             xafs.registerEndPointActivation(new EndPointActivation(smef, as));
 
@@ -194,7 +193,7 @@ public class TestXAResourceImpls {
 
     private static XAFileSystemCommonness bootXAFileSystem() throws Exception {
         XAFileSystemCommonness xaFS;
-        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XADiskSystemDirectory, "local");
+        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
         configuration.setServerPort(9998);
         xaFS = NativeXAFileSystem.bootXAFileSystemStandAlone(configuration);
         return xaFS;

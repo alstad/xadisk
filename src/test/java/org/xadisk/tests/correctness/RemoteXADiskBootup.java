@@ -11,17 +11,18 @@ import org.xadisk.filesystem.NativeXAFileSystem;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
 
 public class RemoteXADiskBootup {
-
     public static final int DEFAULT_PORT = 5151;
     public static boolean cleanSystemDir = false;
-    public static String XADiskSystemDirectory = "C:\\XADiskSystemRemote#" + DEFAULT_PORT;
+    private static final String SEPARATOR = File.separator;
+    private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
+    static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystemRemote#" + DEFAULT_PORT;
 
     public static void main(String args[]) {
         try {
             if (cleanSystemDir) {
-                TestUtility.cleanupDirectory(new File(XADiskSystemDirectory));
+                TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
             }
-            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XADiskSystemDirectory, "remote");
+            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "remote");
             configuration.setWorkManagerCorePoolSize(100);
             configuration.setWorkManagerMaxPoolSize(100);
             configuration.setTransactionTimeout(Integer.MAX_VALUE);

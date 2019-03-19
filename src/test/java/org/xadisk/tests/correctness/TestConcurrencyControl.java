@@ -16,6 +16,10 @@ import org.xadisk.bridge.proxies.interfaces.XAFileSystemProxy;
 import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
 
 public class TestConcurrencyControl {
+    private static final String SEPARATOR = File.separator;
+    private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
+    private static final String TMP_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "tmp" + SEPARATOR;
+    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + "XADiskSystem"  + SEPARATOR;
 
     @Test
     public void testConcurrencyControl() {
@@ -24,14 +28,14 @@ public class TestConcurrencyControl {
 
     public static void main(String args[]) {
         try {
-            StandaloneFileSystemConfiguration configurationMaster = new StandaloneFileSystemConfiguration("C:\\xaMaster", "master");
+            StandaloneFileSystemConfiguration configurationMaster = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY + "xaMaster", "master");
             configurationMaster.setEnableClusterMode(true);
             configurationMaster.setServerAddress("localhost");
             configurationMaster.setServerPort(9999);
             configurationMaster.setDeadLockDetectorInterval(1);
             XAFileSystemProxy.bootNativeXAFileSystem(configurationMaster).waitForBootup(-1);
 
-            StandaloneFileSystemConfiguration configurationSlave = new StandaloneFileSystemConfiguration("C:\\xaSlave", "slave");
+            StandaloneFileSystemConfiguration configurationSlave = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY + "xaSlave", "slave");
             configurationSlave.setEnableClusterMode(true);
             configurationSlave.setClusterMasterAddress("localhost");
             //configurationSlave.setClusterMasterAddress("#master");
@@ -43,7 +47,7 @@ public class TestConcurrencyControl {
             testTransactionTimeout(xafs);
             testDeadlock(xafs);
 
-            File rename = new File("C:\\test\\1");
+            File rename = new File(TMP_DIRECTORY + "test" +SEPARATOR + "1");
             File delete = new File(rename, "a.txt");
             rename.mkdirs();
             delete.createNewFile();
@@ -101,7 +105,7 @@ public class TestConcurrencyControl {
 
     private static void testTransactionTimeout(XAFileSystem xafs) {
         try {
-            File f = new File("C:\\a.txt");
+            File f = new File(TMP_DIRECTORY +"a.txt");
             Session session1 = xafs.createSessionForLocalTransaction();
             session1.setTransactionTimeout(1);
             Thread.sleep(3000);
@@ -113,8 +117,8 @@ public class TestConcurrencyControl {
 
     private static void testDeadlock(XAFileSystem xafs) {
         try {
-            File f1 = new File("C:\\1.txt");
-            File f2 = new File("C:\\2.txt");
+            File f1 = new File(TMP_DIRECTORY + "1.txt");
+            File f2 = new File(TMP_DIRECTORY + "2.txt");
             f1.createNewFile();
             f2.createNewFile();
             Session session1 = xafs.createSessionForLocalTransaction();

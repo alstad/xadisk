@@ -20,6 +20,10 @@ import org.xadisk.tests.correctness.TestUtility;
  * Thanks.
  */
 public class Appraiser {
+    private static final String SEPARATOR = File.separator;
+    private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
+    private static final String TMP_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "tmp" + SEPARATOR;
+    private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "xadiskPerformance";
 
     private static final int UNIT_SIZE = 100;
     public static final int BUFFER_SIZE = UNIT_SIZE * 10;
@@ -27,9 +31,8 @@ public class Appraiser {
 
     public static void main(String args[]) {
         try {
-            String xadiskHome = "C:\\xadiskPerformance";
             XAFileSystem xafs = null;
-            File testDirectory = new File("C:\\test");
+            File testDirectory = new File(TMP_DIRECTORY + "test");
             int concurrency = 4;
             boolean useXADisk = true;
             long averageWriterTime = 0;
@@ -38,10 +41,10 @@ public class Appraiser {
             long repetitions = 3;
 
             for (int repetition = 0; repetition < repetitions; repetition++) {
-                TestUtility.cleanupDirectory(new File(xadiskHome));
+                TestUtility.cleanupDirectory(new File(XA_DISK_SYSTEM_DIRECTORY));
                 if (useXADisk) {
                     StandaloneFileSystemConfiguration configuration =
-                            new StandaloneFileSystemConfiguration(xadiskHome, "");
+                            new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "");
                     configuration.setTransactionTimeout(Integer.MAX_VALUE);
                     configuration.setBufferPoolRelieverInterval(Integer.MAX_VALUE);
                     xafs = XAFileSystemProxy.bootNativeXAFileSystem(configuration);

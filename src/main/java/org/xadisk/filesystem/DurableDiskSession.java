@@ -6,18 +6,14 @@
  */
 package org.xadisk.filesystem;
 
-import java.io.*;
-import java.nio.channels.Channel;
-import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.xadisk.filesystem.utilities.FileIOUtility;
 import org.xadisk.filesystem.utilities.MiscUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.*;
+import java.util.*;
 
 public class DurableDiskSession {
 
@@ -47,8 +43,8 @@ public class DurableDiskSession {
      */
     private static boolean forceDirectories(String[] directoryPaths) {
         for (String directoryPath : directoryPaths) {
-            try(final FileChannel file = FileChannel.open(Paths.get(directoryPath),StandardOpenOption.READ)) {
-                file.force(true);
+            try {
+                fsync(Paths.get(directoryPath));
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -56,6 +52,26 @@ public class DurableDiskSession {
         }
 
         return true;
+    }
+
+    /**
+     * Force any changes (including metadata) to the given file/directory to be
+     * written to the storage device that contains it.
+     *
+     * @param path path to a file or directory
+     * @throws IOException If some I/= errors occurs
+     */
+    public static void fsync(Path path) throws IOException {
+        final boolean isDirectory = Files.isDirectory(path);
+        OpenOption openOption = isDirectory ? StandardOpenOption.READ : StandardOpenOption.WRITE;
+        try(final FileChannel file = FileChannel.open(path, openOption)) {
+            file.force(true);
+        } catch (IOException ioException) {
+            if (isDirectory) {
+                return;
+            }
+            throw ioException;
+        }
     }
 
     public void forceToDisk() throws IOException {

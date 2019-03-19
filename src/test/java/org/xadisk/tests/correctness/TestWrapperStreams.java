@@ -7,6 +7,7 @@
 package org.xadisk.tests.correctness;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.xadisk.additional.XAFileInputStreamWrapper;
 import org.xadisk.additional.XAFileOutputStreamWrapper;
@@ -21,12 +22,25 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class TestWrapperStreams {
     private static final String SEPARATOR = File.separator;
     private static final String CURRENT_WORKING_DIRECTORY = System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "XADisk";
     private static final String TMP_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "tmp" + SEPARATOR;
     private static final String XA_DISK_SYSTEM_DIRECTORY = CURRENT_WORKING_DIRECTORY + SEPARATOR + "XADiskSystem";
+
+    @Before
+    public void setupTest() throws IOException {
+        new File(TMP_DIRECTORY).mkdirs();
+        Files.write(Paths.get(TMP_DIRECTORY, "a.txt"), "abcdef".getBytes(StandardCharsets.UTF_8), CREATE);
+    }
 
     @After
     public void shutdownXaDisk() throws IOException {
@@ -43,35 +57,36 @@ public class TestWrapperStreams {
     }
 
     @Test
-    public void wrapperStreams() {
-        try {
-            StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
-            configuration.setWorkManagerCorePoolSize(100);
-            configuration.setWorkManagerMaxPoolSize(100);
-            configuration.setServerPort(9998);
+    public void testReadingAndWritingThroughStreams() throws Exception {
+        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
+        configuration.setWorkManagerCorePoolSize(100);
+        configuration.setWorkManagerMaxPoolSize(100);
+        configuration.setServerPort(9998);
 
-            NativeXAFileSystem xaFileSystem = NativeXAFileSystem.bootXAFileSystemStandAlone(configuration);
-            xaFileSystem.waitForBootup(-1L);
+        NativeXAFileSystem xaFileSystem = NativeXAFileSystem.bootXAFileSystemStandAlone(configuration);
+        xaFileSystem.waitForBootup(-1L);
 
-            Session session = xaFileSystem.createSessionForLocalTransaction();
-            InputStream is = new XAFileInputStreamWrapper(session.createXAFileInputStream(new File(TMP_DIRECTORY +"a.txt"), false));
-            is.mark(100);
-            System.out.println((char) is.read());
-            System.out.println((char) is.read());
-            System.out.println((char) is.read());
-            is.reset();
-            System.out.println((char) is.read());
-            is.close();
+        Session session = xaFileSystem.createSessionForLocalTransaction();
+        InputStream inputStream = new XAFileInputStreamWrapper(session.createXAFileInputStream(new File(TMP_DIRECTORY +"a.txt"), false));
+        inputStream.mark(100);
+        assertThat((char) inputStream.read(), is('a'));
+        assertThat((char) inputStream.read(), is('b'));
+        assertThat((char) inputStream.read(), is('c'));
+        inputStream.reset();
+        assertThat((char) inputStream.read(), is('a'));
+        inputStream.close();
 
-            OutputStream os = new XAFileOutputStreamWrapper(session.createXAFileOutputStream(new File(TMP_DIRECTORY +"b.txt"), false));
-            os.write('a');
-            os.write('b');
-            os.close();
-            session.commit();
+        final File outputFile = new File(TMP_DIRECTORY + "b.txt");
+        session.createFile(outputFile, false);
+        OutputStream os = new XAFileOutputStreamWrapper(session.createXAFileOutputStream(outputFile, false));
+        os.write('a');
+        os.write('b');
+        os.close();
 
-            xaFileSystem.shutdown();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+        assertThat("A file created inside a session/transaction should NOT be visible before commit", outputFile.exists(), is(false));
+        session.commit();
+        assertThat("A file created inside a session/transaction should be visible after commit", outputFile.exists(), is(true));
+
+        xaFileSystem.shutdown();
     }
 }

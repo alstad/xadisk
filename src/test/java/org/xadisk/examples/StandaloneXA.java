@@ -42,7 +42,7 @@ public class StandaloneXA {
     public static void main(String args[]) {
         XAFileSystem xafs = null;
         try {
-            System.out.println("Botting an XADisk instance...");
+            System.out.println("Booting an XADisk instance...");
             StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(xadiskSystemDirectory, "1");
             xafs = XAFileSystemProxy.bootNativeXAFileSystem(configuration);
             xafs.waitForBootup(-1);

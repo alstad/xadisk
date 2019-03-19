@@ -75,7 +75,7 @@ public class BootXADisk {
         configuration.setServerAddress(thisMachineAddress);
         configuration.setServerPort(port);
 
-        System.out.println("Botting an instance of XADisk. This instance can serve applications running on the same JVM, or "
+        System.out.println("Booting an instance of XADisk. This instance can serve applications running on the same JVM, or "
                 + "remote applications through [" + thisMachineAddress + ":" + port + "]");
         XAFileSystem xaf = XAFileSystemProxy.bootNativeXAFileSystem(configuration);
 

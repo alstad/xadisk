@@ -16,7 +16,7 @@ Contributor : Christoph Beck
     <groupId>java.net.xadisk</groupId>
     <artifactId>xadisk</artifactId>
     <version>1.3</version>
-    <packaging>jar</packaging>
+    <packaging>rar</packaging>
     <name>XADisk</name>
     <description>Transactional Wrapper for File Systems</description>
 
@@ -63,6 +63,7 @@ Contributor : Christoph Beck
     </dependencies>
 
     <build>
+        <finalName>xadisk</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -73,14 +74,71 @@ Contributor : Christoph Beck
                 </configuration>
             </plugin>
             <plugin>
+                <!-- Create the jar library that should be included inside the .rar-file -->
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-rar-plugin</artifactId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version><!-- this plugin fail if using version 3.1.0, as that version conflicts with the maven-rar-plugin -->
                 <executions>
                     <execution>
+                        <id>jarCreation</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/META-INF/*</exclude>
+                    </excludes>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <customClasspathLayout>$${artifact.artifactId}.$${artifact.extension}</customClasspathLayout>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-rar-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
                         <phase>package</phase>
                         <goals>
                             <goal>rar</goal>
                         </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includeJar>true</includeJar>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- attaches the generated jar to the project for install and deploy -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.10</version>
+                <executions>
+                    <execution>
+                        <id>attach-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/xadisk.jar</file>
+                                    <type>jar</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

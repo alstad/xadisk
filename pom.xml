@@ -75,10 +75,6 @@ Contributor : Christoph Beck
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-rar-plugin</artifactId>
-                <configuration>
-                    <includeJar>true</includeJar>
-                    <raXmlFile>src/META-INF/ra.xml</raXmlFile>
-                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>

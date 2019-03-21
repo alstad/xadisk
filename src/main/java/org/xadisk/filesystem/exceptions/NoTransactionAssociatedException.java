@@ -44,6 +44,6 @@ public class NoTransactionAssociatedException extends XAApplicationException {
     @Override
     public String getMessage() {
         return "The method that was called can only be called with a transaction associated, but"
-                + "there is no such transaction present.";
+                + " there is no such transaction present.";
     }
 }

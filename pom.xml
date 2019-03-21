@@ -142,6 +142,36 @@ Contributor : Christoph Beck
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-source</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <additionalparam>-xdoclint:none</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <additionalparam>-xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>

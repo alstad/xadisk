@@ -470,7 +470,7 @@ public class NativeSession implements SessionCommonness {
         }
     }
 
-    //now onwards, this locking flag is ignored and no locking is involved in this operation.
+    @Deprecated
     public String[] listFiles(File f, boolean lockExclusively) throws FileNotExistsException, LockingFailedException,
             InsufficientPermissionOnFileException,
             InterruptedException, NoTransactionAssociatedException {

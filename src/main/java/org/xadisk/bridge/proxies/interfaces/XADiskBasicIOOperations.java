@@ -283,10 +283,13 @@ public interface XADiskBasicIOOperations {
 
     /**
      * Lists the contents of the directory.
-     * @param f the directory path.
+     *
+     * @deprecated the 'lockExclusively' flag is ignored and no locking is involved in this operation.
+     *             Use {@link #listFiles(File)} instead.
+     * @param f               the directory path.
      * @param lockExclusively this parameter is ignored and is being retained only to protect existing
-     * applications' code. Version 1.1 onwards, this method is equivalent to
-     * <i> {@link #listFiles(File) listFiles(f)} </i>.
+     *                        applications' code. Version 1.1 onwards, this method is equivalent to
+     *                        <i> {@link #listFiles(File) listFiles(f)} </i>.
      * @return an array of Strings containing names of files/directories.
      * @throws FileNotExistsException
      * @throws LockingFailedException
@@ -294,14 +297,14 @@ public interface XADiskBasicIOOperations {
      * @throws InterruptedException
      * @throws InsufficientPermissionOnFileException
      */
+    @Deprecated
     public String[] listFiles(File f, boolean lockExclusively) throws FileNotExistsException, LockingFailedException,
             NoTransactionAssociatedException, InterruptedException,
             InsufficientPermissionOnFileException;
 
     /**
      * Lists the contents of the directory.
-     * This method is equivalent to:
-     * <i> {@link #listFiles(File, boolean) listFiles(f, false)} </i>
+     *
      * @param f the directory path.
      * @return an array of Strings containing names of files/directories.
      * @throws FileNotExistsException

@@ -15,7 +15,7 @@ Contributor : Christoph Beck
     <modelVersion>4.0.0</modelVersion>
     <groupId>java.net.xadisk</groupId>
     <artifactId>xadisk</artifactId>
-    <version>1.3</version>
+    <version>1.3-SNAPSHOT</version>
     <packaging>rar</packaging>
     <name>XADisk</name>
     <description>Transactional Wrapper for File Systems</description>

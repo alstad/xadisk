@@ -221,6 +221,9 @@ public class NativeSession implements SessionCommonness {
             newLock = acquireLockIfRequired(f, true);
             File parentFile = f.getParentFile();
             checkValidParent(f);
+            if (!fileExistsAndIsDirectory(parentFile)) {
+                createFile(parentFile, true);
+            }
             checkPermission(PermissionType.WRITE_DIRECTORY, parentFile);
             view.createFile(f, isDirectory);
             byte operation = isDirectory ? TransactionLogEntry.DIR_CREATE : TransactionLogEntry.FILE_CREATE;

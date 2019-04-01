@@ -50,4 +50,25 @@ public class BasicIOOperationsTest {
         boolean existResult = xaSession.fileExists(new File(CURRENT_WORKING_DIRECTORY, "non-existing-dir/non-existing-file.txt"));
         assertThat(existResult, is(false));
     }
+
+    @Test
+    public void createFile_in_nonexisting_dir() throws InterruptedException, XAApplicationException {
+        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
+        XAFileSystem xafs = XAFileSystemProxy.bootNativeXAFileSystem(configuration);
+        xafs.waitForBootup(-1);
+        Session xaSession = xafs.createSessionForLocalTransaction();
+
+        final File nonExistingDir = new File(CURRENT_WORKING_DIRECTORY, "non-existing-dir");
+        assertThat(nonExistingDir.exists(), is(false));
+
+        final File nonExistingFile = new File(CURRENT_WORKING_DIRECTORY, "non-existing-dir/non-existing-file.txt");
+        xaSession.createFile(nonExistingFile, false);
+        // The file and its parent folder should only exist inside the transaction at this point in time
+        assertThat(nonExistingDir.exists(), is(false));
+        assertThat(nonExistingFile.exists(), is(false));
+
+        xaSession.commit();
+        assertThat(nonExistingDir.exists(), is(true));
+        assertThat(nonExistingFile.exists(), is(true));
+    }
 }

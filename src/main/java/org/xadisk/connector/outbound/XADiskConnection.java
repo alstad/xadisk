@@ -8,6 +8,8 @@ package org.xadisk.connector.outbound;
 
 import org.xadisk.bridge.proxies.interfaces.XADiskBasicIOOperations;
 
+import java.io.Closeable;
+
 /**
  * This interface is applicable only when invoking XADisk as a JCA Resource Adapter.
  * <p> This interface represents the connection object used inside JavaEE applications
@@ -16,7 +18,7 @@ import org.xadisk.bridge.proxies.interfaces.XADiskBasicIOOperations;
  *
  * @since 1.0
  */
-public interface XADiskConnection extends XADiskBasicIOOperations {
+public interface XADiskConnection extends XADiskBasicIOOperations, Closeable {
 
     /**
      * Returns an instance of local transaction object which can be used by JavaEE applications

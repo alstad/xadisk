@@ -104,10 +104,11 @@ public class XADiskConnectionImpl implements XADiskConnection, XADiskRemoteConne
         return mc.getSessionForCurrentWorkAssociation().fileExistsAndIsDirectory(f);
     }
 
+    @Deprecated
     public String[] listFiles(File f, boolean lockExclusively) throws FileNotExistsException, LockingFailedException,
             NoTransactionAssociatedException, InsufficientPermissionOnFileException,
             InterruptedException {
-        return mc.getSessionForCurrentWorkAssociation().listFiles(f, lockExclusively);
+        return mc.getSessionForCurrentWorkAssociation().listFiles(f);
     }
 
     public String[] listFiles(File f) throws FileNotExistsException, LockingFailedException,

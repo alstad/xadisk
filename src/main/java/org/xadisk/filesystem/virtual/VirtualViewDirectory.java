@@ -188,7 +188,7 @@ class VirtualViewDirectory {
         return allFilesDirs.toArray(new String[0]);
     }
 
-    private boolean isPermissionAvailable(String name, boolean isDirectory, boolean writePermission) {
+    private boolean isPermissionAvailable(String name, boolean isDirectory, boolean writePermission) throws FileNotExistsException {
         LockedFileInfo lockedInfo;
         if (isDirectory) {
             lockedInfo = lockedDirsInfo.get(name);
@@ -213,28 +213,32 @@ class VirtualViewDirectory {
             if (pointsToPhysicalDirectory == null) {
                 return false;
             } else {
+                final File physicalFileOrDirectory = new File(pointsToPhysicalDirectory, name);
+                if (!physicalFileOrDirectory.exists()) {
+                    throw new FileNotExistsException(physicalFileOrDirectory.getPath());
+                }
                 if (writePermission) {
-                    return new File(pointsToPhysicalDirectory, name).canWrite();
+                    return physicalFileOrDirectory.canWrite();
                 } else {
-                    return new File(pointsToPhysicalDirectory, name).canRead();
+                    return physicalFileOrDirectory.canRead();
                 }
             }
         }
     }
 
-    boolean isFileWritable(String fileName) {
+    boolean isFileWritable(String fileName) throws FileNotExistsException {
         return isPermissionAvailable(fileName, false, true);
     }
 
-    boolean isFileReadable(String fileName) {
+    boolean isFileReadable(String fileName) throws FileNotExistsException {
         return isPermissionAvailable(fileName, false, false);
     }
 
-    boolean isDirWritable(String fileName) {
+    boolean isDirWritable(String fileName) throws FileNotExistsException {
         return isPermissionAvailable(fileName, true, true);
     }
 
-    boolean isDirReadable(String fileName) {
+    boolean isDirReadable(String fileName) throws FileNotExistsException {
         return isPermissionAvailable(fileName, true, false);
     }
 

@@ -89,10 +89,11 @@ public class XADiskManagedConnection extends NativeXASession implements ManagedC
     }
 
     void connectionClosed(XADiskConnection connection) {
-        connectionHandles.remove(connection);
-        ConnectionEvent connectionEvent = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
-        connectionEvent.setConnectionHandle(connection);
-        raiseConnectionEvent(connectionEvent);
+        if (connectionHandles.remove(connection)) {
+            ConnectionEvent connectionEvent = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
+            connectionEvent.setConnectionHandle(connection);
+            raiseConnectionEvent(connectionEvent);
+        }
     }
 
     private void raiseConnectionEvent(ConnectionEvent ce) {

@@ -55,19 +55,7 @@ public class FileIOUtility {
     }
 
     public static void deleteFile(File f) throws IOException {
-        if (f.delete()) {
-            return;
-        }
-        if (!f.getParentFile().canWrite()) {
-            throw new IOException("Parent directory not writable.");
-        }
-        if (!f.exists()) {
-            throw new IOException("File does not exist.");
-        }
-        int retryCount = 1;
-        while (!f.delete()) {
-            doGCBeforeRetry(retryCount++, f);
-        }
+        Files.delete(f.toPath());
     }
 
     private static void deleteEmptyDirectory(File dir) throws IOException {

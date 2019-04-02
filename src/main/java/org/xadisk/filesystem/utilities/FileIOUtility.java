@@ -15,8 +15,9 @@ import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Stream;
 
 import org.xadisk.filesystem.NativeXAFileSystem;
 
@@ -30,55 +31,31 @@ public class FileIOUtility {
         Files.delete(f.toPath());
     }
 
-    private static void deleteEmptyDirectory(File dir) throws IOException {
-        deleteFile(dir);
-    }
-
     public static void deleteDirectoryRecursively(File dir) throws IOException {
-        if (!dir.exists()) {
+        if (!Files.exists(dir.toPath())) {
             return;
         }
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].isDirectory()) {
-                deleteDirectoryRecursively(files[i]);
-            } else {
-                deleteFile(files[i]);
+        Files.walkFileTree(dir.toPath(), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
             }
-        }
-        deleteEmptyDirectory(dir);
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     public static void createFile(File f) throws IOException {
-        if (f.createNewFile()) {
-            return;
-        }
-        if (f.exists()) {
-            throw new IOException("File already exists.");
-        }
-        if (!f.getParentFile().canWrite()) {
-            throw new IOException("Parent directory not writable.");
-        }
-        int retryCount = 1;
-        while (!f.createNewFile()) {
-            doGCBeforeRetry(retryCount++, f);
-        }
+        Files.createFile(f.toPath());
     }
 
     public static void createDirectory(File dir) throws IOException {
-        if (dir.mkdir()) {
-            return;
-        }
-        if (dir.exists()) {
-            throw new IOException("File already exists.");
-        }
-        if (!dir.getParentFile().canWrite()) {
-            throw new IOException("Parent directory not writable.");
-        }
-        int retryCount = 1;
-        while (!dir.mkdir()) {
-            doGCBeforeRetry(retryCount++, dir);
-        }
+        Files.createDirectory(dir.toPath());
     }
 
     public static void createDirectoriesIfRequired(File dir) throws IOException {
@@ -89,41 +66,16 @@ public class FileIOUtility {
     }
 
     public static String[] listDirectoryContents(File dir) throws IOException {
-        if (!dir.isDirectory()) {
-            throw new IOException("The directory doesn't exist.");
-        }
-        if (!dir.canRead()) {
-            throw new IOException("The directory is not readable.");
-        }
-        String children[] = dir.list();
-        int retryCount = 1;
-        while (children == null) {
-            doGCBeforeRetry(retryCount++, dir);
-            children = dir.list();
-        }
-        return children;
-    }
-
-    private static void doGCBeforeRetry(int retryCount, File f) throws IOException {
-        if (retryCount == 5) {
-            throw new IOException("The i/o operation could not be completed for "
-                    + "the file/directory with path [" + f.getAbsolutePath() + "] due "
-                    + "to an unknown reason.");
-        }
-
-        System.gc();
-        System.gc();
-        System.gc();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            throw (IOException) new IOException().initCause(ie);
+        try (Stream<Path> files = Files.list(dir.toPath())) {
+            return files
+                    .map(Path::toFile)
+                    .map(File::getName)
+                    .toArray(String[]::new);
         }
     }
 
     public static void readFromChannel(FileChannel fc, ByteBuffer buffer, int bufferOffset, int num)
-            throws IOException, EOFException {
+            throws IOException {
         buffer.position(bufferOffset);
         if (buffer.remaining() < num) {
             throw new BufferUnderflowException();

@@ -65,8 +65,8 @@ public class FileIOUtility {
         Files.createDirectories(dir.toPath());
     }
 
-    public static String[] listDirectoryContents(File dir) throws IOException {
-        try (Stream<Path> files = Files.list(dir.toPath())) {
+    public static String[] listDirectoryContents(Path dir) throws IOException {
+        try (Stream<Path> files = Files.list(dir)) {
             return files
                     .map(Path::toFile)
                     .map(File::getName)

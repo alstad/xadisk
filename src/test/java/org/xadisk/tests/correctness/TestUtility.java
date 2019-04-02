@@ -143,7 +143,7 @@ public class TestUtility {
         File[] files = dir.listFiles();
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
-                if (FileIOUtility.listDirectoryContents(files[i]).length > 0) {
+                if (FileIOUtility.listDirectoryContents(files[i].toPath()).length > 0) {
                     cleanupDirectory(files[i]);
                     FileIOUtility.deleteFile(files[i]);
                 } else {

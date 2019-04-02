@@ -91,7 +91,7 @@ public class FileIOUtilityTest {
         assertThat(Files.exists(Paths.get(CURRENT_WORKING_DIRECTORY, "foo")), is(false));
 
         // When
-        FileIOUtility.listDirectoryContents(new File(CURRENT_WORKING_DIRECTORY, "foo"));
+        FileIOUtility.listDirectoryContents(Paths.get(CURRENT_WORKING_DIRECTORY, "foo"));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class FileIOUtilityTest {
         Files.createFile(Paths.get(CURRENT_WORKING_DIRECTORY, "foo", "bar", "test", "some_other_data.txt"));
 
         // When
-        final String[] dirContent = FileIOUtility.listDirectoryContents(new File(CURRENT_WORKING_DIRECTORY, "foo"));
+        final String[] dirContent = FileIOUtility.listDirectoryContents(Paths.get(CURRENT_WORKING_DIRECTORY, "foo"));
 
         // Then
         assertThat(dirContent.length, is(2));

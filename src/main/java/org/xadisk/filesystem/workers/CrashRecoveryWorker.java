@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +58,7 @@ public class CrashRecoveryWorker implements Work {
 
     private void collectLogFileNamesToProcess() throws IOException {
         String logsDir = xaFileSystem.getTransactionLogsDir();
-        String logNames[] = FileIOUtility.listDirectoryContents(new File(logsDir));
+        String logNames[] = FileIOUtility.listDirectoryContents(Paths.get(logsDir));
 
         for (int i = 0; i < logNames.length; i++) {
             int logIndex = Integer.parseInt(logNames[i].split("_")[1]);

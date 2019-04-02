@@ -16,38 +16,14 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import org.xadisk.filesystem.NativeXAFileSystem;
 
 public class FileIOUtility {
 
     public static void renameTo(File src, File dest) throws IOException {
-        if (!src.renameTo(dest)) {
-            if (renamePossible(src, dest)) {
-                int retryCount = 1;
-                while (!src.renameTo(dest)) {
-                    try {
-                        doGCBeforeRetry(retryCount++, src);
-                    } catch(IOException ioe) {
-                        if(ioe.getCause() == null) {
-                            throw new IOException(ioe.getMessage() + " One possible reason is that the "
-                                    + "source path and the destination path belong to different file-systems.");
-                        }
-                    }
-                    if (src.renameTo(dest)) {
-                        break;
-                    }
-                    if (!src.isDirectory()) {
-                        copyFile(src, dest, false);
-                        dest.setLastModified(src.lastModified());
-                        deleteFile(src);
-                        break;
-                    }
-                }
-            } else {
-                throw new IOException("Rename not feasible from " + src + " to " + dest);
-            }
-        }
+        Files.move(src.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
     }
 
     private static boolean renamePossible(File src, File dest) {

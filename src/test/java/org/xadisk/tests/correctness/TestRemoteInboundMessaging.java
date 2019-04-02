@@ -23,6 +23,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import static org.junit.Assert.fail;
 
@@ -42,13 +43,13 @@ public class TestRemoteInboundMessaging {
             }
         }
         // Delete test files/directories
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY));
     }
 
     @Test
     public void main() {
         try {
-            FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+            FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY));
             TestUtility.cleanupDirectory(new File(RemoteXADiskBootup.XA_DISK_SYSTEM_DIRECTORY));
 
             File f = new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + "a.txt");

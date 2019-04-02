@@ -21,6 +21,7 @@ import org.xadisk.filesystem.utilities.FileIOUtility;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -47,8 +48,8 @@ public class TestCoreXAFileSystem {
             }
         }
         // Delete test files/directories
-        FileIOUtility.deleteDirectoryRecursively(new File(TOP_LEVEL_TEST_DIRECTORY));
-        FileIOUtility.deleteDirectoryRecursively(new File(XA_DISK_SYSTEM_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(TOP_LEVEL_TEST_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(XA_DISK_SYSTEM_DIRECTORY));
     }
 
     @Test

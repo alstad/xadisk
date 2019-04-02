@@ -23,6 +23,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 /*For testing, we used Atomikos (open source version) as a JTA implementation. One can get it from
  http://www.atomikos.com/Main/TransactionsEssentials .
@@ -49,8 +50,8 @@ public class TestStandaloneXA {
             }
         }
         // Delete test files/directories
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
-        FileIOUtility.deleteDirectoryRecursively(new File(System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "atomikos"));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(System.getProperty("user.dir") + SEPARATOR + "target" + SEPARATOR + "atomikos"));
     }
 
     @Test

@@ -17,6 +17,7 @@ import org.xadisk.filesystem.utilities.FileIOUtility;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class TestConcurrencyControl {
     private static final String SEPARATOR = File.separator;
@@ -43,7 +44,7 @@ public class TestConcurrencyControl {
             }
         }
         // Delete test files/directories
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY));
     }
 
     @Test

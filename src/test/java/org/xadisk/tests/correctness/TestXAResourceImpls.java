@@ -23,6 +23,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class TestXAResourceImpls {
     private static final String SEPARATOR = File.separator;
@@ -41,7 +42,7 @@ public class TestXAResourceImpls {
             }
         }
         // Delete test files/directories
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY));
     }
 
     @Test
@@ -57,7 +58,7 @@ public class TestXAResourceImpls {
             File f[] = new File[3];
             for (int i = 0; i < 3; i++) {
                 File dir = new File(CURRENT_WORKING_DIRECTORY + SEPARATOR + i);
-                FileIOUtility.deleteDirectoryRecursively(dir);
+                FileIOUtility.deleteDirectoryRecursively(dir.toPath());
                 FileIOUtility.createDirectoriesIfRequired(dir);
                 f[i] = new File(dir, "a.txt");
                 if (f[i].exists()) {

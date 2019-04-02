@@ -51,7 +51,7 @@ public class Appraiser {
                     xafs.waitForBootup(-1);
                 }
 
-                FileIOUtility.deleteDirectoryRecursively(testDirectory);
+                FileIOUtility.deleteDirectoryRecursively(testDirectory.toPath());
                 FileIOUtility.createDirectory(testDirectory);
 
                 AtomicLong totalTimeReaders = new AtomicLong(0);

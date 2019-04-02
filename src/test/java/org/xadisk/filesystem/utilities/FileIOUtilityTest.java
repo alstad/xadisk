@@ -39,7 +39,7 @@ public class FileIOUtilityTest {
         Files.createFile(Paths.get(CURRENT_WORKING_DIRECTORY, "foo", "bar", "test", "some_other_data.txt"));
 
         // When
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY, "foo"));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY, "foo"));
 
         // Then
         assertThat(Files.exists(Paths.get(CURRENT_WORKING_DIRECTORY, "foo", "bar", "test", "some_other_data.txt")), is(false));
@@ -54,7 +54,7 @@ public class FileIOUtilityTest {
         assertThat(Files.exists(Paths.get(CURRENT_WORKING_DIRECTORY, "foo")), is(false));
 
         // When
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY, "foo"));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY, "foo"));
 
         // Then
         assertThat(Files.exists(Paths.get(CURRENT_WORKING_DIRECTORY, "foo")), is(false));
@@ -66,7 +66,7 @@ public class FileIOUtilityTest {
         assertThat(Files.exists(Paths.get(CURRENT_WORKING_DIRECTORY, "foo")), is(false));
 
         // When
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY, "foo"));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY, "foo"));
 
         // Then
         assertThat(Files.exists(Paths.get(CURRENT_WORKING_DIRECTORY, "foo")), is(false));
@@ -79,7 +79,7 @@ public class FileIOUtilityTest {
         Files.createDirectories(Paths.get(CURRENT_WORKING_DIRECTORY, "foo"));
 
         // When
-        FileIOUtility.deleteDirectoryRecursively(new File(CURRENT_WORKING_DIRECTORY, "foo"));
+        FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY, "foo"));
 
         // Then
         assertThat(Files.exists(Paths.get(CURRENT_WORKING_DIRECTORY, "foo")), is(false));

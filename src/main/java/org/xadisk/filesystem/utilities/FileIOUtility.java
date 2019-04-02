@@ -31,11 +31,11 @@ public class FileIOUtility {
         Files.delete(f.toPath());
     }
 
-    public static void deleteDirectoryRecursively(File dir) throws IOException {
-        if (!Files.exists(dir.toPath())) {
+    public static void deleteDirectoryRecursively(Path dir) throws IOException {
+        if (!Files.exists(dir)) {
             return;
         }
-        Files.walkFileTree(dir.toPath(), new SimpleFileVisitor<Path>() {
+        Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);

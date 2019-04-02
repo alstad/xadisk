@@ -26,10 +26,6 @@ public class FileIOUtility {
         Files.move(src.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private static boolean renamePossible(File src, File dest) {
-        return src.exists() && !dest.exists() && src.getParentFile().canWrite() && dest.getParentFile().canWrite();
-    }
-
     public static void deleteFile(File f) throws IOException {
         Files.delete(f.toPath());
     }

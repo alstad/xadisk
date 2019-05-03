@@ -42,6 +42,10 @@ public class BasicIOOperationsTest {
         FileIOUtility.deleteDirectoryRecursively(Paths.get(CURRENT_WORKING_DIRECTORY));
     }
 
+    /**
+     * Checking for file existence for a file inside a non-existing parent directory
+     * should return false (false = does not exist).
+     */
     @Test
     public void fileExists_on_file_in_nonexisting_dir() throws InterruptedException, NoTransactionAssociatedException, InsufficientPermissionOnFileException, LockingFailedException {
         StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
@@ -52,6 +56,10 @@ public class BasicIOOperationsTest {
         assertThat(existResult, is(false));
     }
 
+    /**
+     * Creating a file in a non-existing dir should create the file and the necessary parent directories. The new
+     * file and directories should only exist after XASession#commit().
+     */
     @Test
     public void createFile_in_nonexisting_dir() throws InterruptedException, XAApplicationException {
         StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");

@@ -43,7 +43,7 @@ public class BasicIOOperationsTest {
     }
 
     /**
-     * Checking for file existence for a file inside a non-existing parent directory
+     * Checking for file existence for a non-existing file inside a non-existing parent directory
      * should return false (false = does not exist).
      */
     @Test
@@ -79,5 +79,22 @@ public class BasicIOOperationsTest {
         xaSession.commit();
         assertThat(nonExistingDir.exists(), is(true));
         assertThat(nonExistingFile.exists(), is(true));
+    }
+
+    /**
+     * Checking for file existence for a non-existing file inside a parent-of-parent directory created within the current session.
+     */
+    @Test
+    public void fileExists_on_file_in_tracked_session_dir() throws InterruptedException, NoTransactionAssociatedException, InsufficientPermissionOnFileException, LockingFailedException, FileAlreadyExistsException, FileNotExistsException {
+        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(XA_DISK_SYSTEM_DIRECTORY, "local");
+        XAFileSystem xafs = XAFileSystemProxy.bootNativeXAFileSystem(configuration);
+        xafs.waitForBootup(-1);
+        Session xaSession = xafs.createSessionForLocalTransaction();
+
+        // Create "tracked" (i.e. non-committed) representations of "dir_A", "dir_B" and "foo.txt"
+        xaSession.createFile(new File(CURRENT_WORKING_DIRECTORY, "dir_A/dir_B/foo.txt"), false);
+
+        boolean existResult = xaSession.fileExists(new File(CURRENT_WORKING_DIRECTORY, "dir_A/dir_C/bar.txt"));
+        assertThat(existResult, is(false));
     }
 }

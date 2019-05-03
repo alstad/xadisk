@@ -211,7 +211,7 @@ class VirtualViewDirectory {
             }
         } else {
             if (pointsToPhysicalDirectory == null) {
-                return false;
+                throw new FileNotExistsException(new File(virtualDirName, name).getPath());
             } else {
                 final File physicalFileOrDirectory = new File(pointsToPhysicalDirectory, name);
                 if (!physicalFileOrDirectory.exists()) {
